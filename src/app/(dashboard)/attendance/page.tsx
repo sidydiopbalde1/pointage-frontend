@@ -15,7 +15,7 @@ const VALIDATION_MESSAGES: Record<string, string> = {
   'longitude must not be less than -180':                         'La longitude doit être ≥ -180°',
   'longitude must be a number conforming to the specified constraints': 'La longitude doit être un nombre valide',
 };
-
+// add for deploy
 function parseApiError(e: unknown, fallback = 'Une erreur est survenue'): string {
   const data = (e as { response?: { data?: { message?: string | string[] } } })?.response?.data;
   if (!data?.message) return fallback;
