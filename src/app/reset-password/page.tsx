@@ -4,6 +4,12 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import api from '@/lib/api';
 
+function CurrentYear() {
+  const [year, setYear] = useState(2026);
+  useEffect(() => { setYear(new Date().getFullYear()); }, []);
+  return <>{year}</>;
+}
+
 type Step = 'form' | 'success' | 'invalid';
 
 function ResetPasswordForm() {
@@ -320,7 +326,7 @@ export default function ResetPasswordPage() {
           </div>
 
           <p className="text-center text-slate-400 text-xs mt-6">
-            © <Suspense fallback="2026">{new Date().getFullYear()}</Suspense> Pointage Pro — Tous droits réservés
+            © <CurrentYear /> Pointage Pro — Tous droits réservés
           </p>
         </div>
       </div>

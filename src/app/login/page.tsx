@@ -1,8 +1,14 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+
+function CurrentYear() {
+  const [year, setYear] = useState(2026);
+  useEffect(() => { setYear(new Date().getFullYear()); }, []);
+  return <>{year}</>;
+}
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -193,7 +199,7 @@ export default function LoginPage() {
           </div>
 
           <p className="text-center text-slate-400 text-xs mt-6">
-            © <Suspense fallback="2026">{new Date().getFullYear()}</Suspense> Pointage Pro — Tous droits réservés
+            © <CurrentYear /> Pointage Pro — Tous droits réservés
           </p>
         </div>
       </div>
