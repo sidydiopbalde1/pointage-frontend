@@ -320,7 +320,7 @@ export default function ResetPasswordPage() {
           </div>
 
           <p className="text-center text-slate-400 text-xs mt-6">
-            © {new Date().getFullYear()} Pointage Pro — Tous droits réservés
+            © <Suspense fallback="2026">{new Date().getFullYear()}</Suspense> Pointage Pro — Tous droits réservés
           </p>
         </div>
       </div>
