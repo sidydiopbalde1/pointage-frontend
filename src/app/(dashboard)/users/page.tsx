@@ -45,7 +45,7 @@ export default function UsersPage() {
   });
 
   const createMut = useMutation({
-    mutationFn: (data: typeof EMPTY_FORM) => api.post('/users', data),
+    mutationFn: (data: Omit<typeof EMPTY_FORM, 'isActive'>) => api.post('/users', data),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['users'] }); setShowModal(false); showToast('Utilisateur créé !', 'success'); },
     onError: (e: unknown) => {
       const msg = (e as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Erreur';
