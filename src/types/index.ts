@@ -14,6 +14,8 @@ export interface User {
   position?: string;
   phone?: string;
   isActive: boolean;
+  workStartTime: string;
+  workEndTime: string;
   createdAt: string;
 }
 

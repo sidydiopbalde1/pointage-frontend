@@ -20,6 +20,7 @@ function Skeleton({ className = '' }: { className?: string }) {
 const EMPTY_FORM = {
   firstName: '', lastName: '', email: '', password: '',
   role: 'EMPLOYEE' as Role, department: '', position: '', phone: '',
+  workStartTime: '09:00', workEndTime: '17:00', isActive: true,
 };
 
 export default function UsersPage() {
@@ -40,7 +41,7 @@ export default function UsersPage() {
 
   const { data: users, isLoading } = useQuery<User[]>({
     queryKey: ['users'],
-    queryFn: () => api.get('/users').then((r) => r.data),
+    queryFn: () => api.get('/users?includeInactive=true').then((r) => r.data),
   });
 
   const createMut = useMutation({
@@ -71,7 +72,7 @@ export default function UsersPage() {
   const openCreate = () => { setEditUser(null); setForm(EMPTY_FORM); setShowModal(true); };
   const openEdit = (u: User) => {
     setEditUser(u);
-    setForm({ ...EMPTY_FORM, firstName: u.firstName, lastName: u.lastName, email: u.email, role: u.role, department: u.department ?? '', position: u.position ?? '', phone: u.phone ?? '' });
+    setForm({ ...EMPTY_FORM, firstName: u.firstName, lastName: u.lastName, email: u.email, role: u.role, department: u.department ?? '', position: u.position ?? '', phone: u.phone ?? '', workStartTime: u.workStartTime ?? '09:00', workEndTime: u.workEndTime ?? '17:00', isActive: u.isActive });
     setShowModal(true);
   };
 
@@ -81,7 +82,8 @@ export default function UsersPage() {
       const { password, ...rest } = form;
       updateMut.mutate({ id: editUser.id, data: password ? form : rest });
     } else {
-      createMut.mutate(form);
+      const { isActive, ...createData } = form;
+      createMut.mutate(createData);
     }
   };
 
@@ -274,6 +276,40 @@ export default function UsersPage() {
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5">Téléphone</label>
                 <input type="tel" className="input-field" value={form.phone} onChange={(e) => setForm(f => ({ ...f, phone: e.target.value }))} />
               </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Début de travail</label>
+                  <input
+                    type="time"
+                    className="input-field"
+                    value={form.workStartTime}
+                    onChange={(e) => setForm(f => ({ ...f, workStartTime: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Fin de travail</label>
+                  <input
+                    type="time"
+                    className="input-field"
+                    value={form.workEndTime}
+                    onChange={(e) => setForm(f => ({ ...f, workEndTime: e.target.value }))}
+                  />
+                </div>
+              </div>
+              {editUser && (
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setForm(f => ({ ...f, isActive: !f.isActive }))}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.isActive ? 'bg-emerald-500' : 'bg-slate-300'}`}
+                  >
+                    <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${form.isActive ? 'translate-x-6' : 'translate-x-1'}`} />
+                  </button>
+                  <span className="text-sm font-semibold text-slate-700">
+                    {form.isActive ? 'Compte actif' : 'Compte inactif'}
+                  </span>
+                </div>
+              )}
               <div className="flex gap-3 pt-1">
                 <button type="button" onClick={() => setShowModal(false)} className="btn-secondary flex-1 justify-center">
                   Annuler
