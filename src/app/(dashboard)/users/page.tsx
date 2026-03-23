@@ -17,10 +17,20 @@ function Skeleton({ className = '' }: { className?: string }) {
   return <div className={`skeleton ${className}`} />;
 }
 
+const DAYS = [
+  { value: 1, label: 'Lun' },
+  { value: 2, label: 'Mar' },
+  { value: 3, label: 'Mer' },
+  { value: 4, label: 'Jeu' },
+  { value: 5, label: 'Ven' },
+  { value: 6, label: 'Sam' },
+  { value: 0, label: 'Dim' },
+];
+
 const EMPTY_FORM = {
   firstName: '', lastName: '', email: '', password: '',
   role: 'EMPLOYEE' as Role, department: '', position: '', phone: '',
-  workStartTime: '09:00', workEndTime: '17:00', isActive: true,
+  workStartTime: '09:00', workEndTime: '17:00', workDays: '1,2,3,4,5', isActive: true,
 };
 
 export default function UsersPage() {
@@ -72,7 +82,7 @@ export default function UsersPage() {
   const openCreate = () => { setEditUser(null); setForm(EMPTY_FORM); setShowModal(true); };
   const openEdit = (u: User) => {
     setEditUser(u);
-    setForm({ ...EMPTY_FORM, firstName: u.firstName, lastName: u.lastName, email: u.email, role: u.role, department: u.department ?? '', position: u.position ?? '', phone: u.phone ?? '', workStartTime: u.workStartTime ?? '09:00', workEndTime: u.workEndTime ?? '17:00', isActive: u.isActive });
+    setForm({ ...EMPTY_FORM, firstName: u.firstName, lastName: u.lastName, email: u.email, role: u.role, department: u.department ?? '', position: u.position ?? '', phone: u.phone ?? '', workStartTime: u.workStartTime ?? '09:00', workEndTime: u.workEndTime ?? '17:00', workDays: u.workDays ?? '1,2,3,4,5', isActive: u.isActive });
     setShowModal(true);
   };
 
@@ -294,6 +304,30 @@ export default function UsersPage() {
                     value={form.workEndTime}
                     onChange={(e) => setForm(f => ({ ...f, workEndTime: e.target.value }))}
                   />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Jours travaillés</label>
+                <div className="flex gap-2 flex-wrap">
+                  {DAYS.map((d) => {
+                    const active = form.workDays.split(',').map(Number).includes(d.value);
+                    return (
+                      <button
+                        key={d.value}
+                        type="button"
+                        onClick={() => {
+                          const current = form.workDays.split(',').map(Number).filter(Boolean);
+                          const next = active
+                            ? current.filter((v) => v !== d.value)
+                            : [...current, d.value].sort((a, b) => a - b);
+                          setForm(f => ({ ...f, workDays: next.join(',') || '0' }));
+                        }}
+                        className={`w-10 h-10 rounded-lg text-xs font-bold transition-all ${active ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                      >
+                        {d.label}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
               {editUser && (

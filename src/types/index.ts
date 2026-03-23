@@ -16,6 +16,7 @@ export interface User {
   isActive: boolean;
   workStartTime: string;
   workEndTime: string;
+  workDays: string;
   createdAt: string;
 }
 
@@ -84,4 +85,25 @@ export interface LeaveStats {
   pending: number;
   rejected: number;
   cancelled: number;
+}
+
+export interface PublicHoliday {
+  id: string;
+  date: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Absence {
+  id: string;
+  userId: string;
+  date: string;
+  justified: boolean;
+  justification?: string;
+  documentPath?: string;
+  reviewedBy?: string;
+  reviewedAt?: string;
+  createdAt: string;
+  user?: Pick<User, 'firstName' | 'lastName' | 'department'>;
 }

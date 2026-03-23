@@ -80,6 +80,8 @@ export default function AttendancePage() {
   const [manualForm, setManualForm] = useState({ ...EMPTY_FORM });
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof typeof EMPTY_FORM, string>>>({});
   const [filterDate, setFilterDate] = useState('');
+  const [filterUserId, setFilterUserId] = useState('');
+  const [filterDepartment, setFilterDepartment] = useState('');
 
   const clearFieldError = (field: keyof typeof EMPTY_FORM) =>
     setFieldErrors((prev) => { const next = { ...prev }; delete next[field]; return next; });
@@ -175,10 +177,12 @@ export default function AttendancePage() {
   });
 
   const params = new URLSearchParams();
-  if (filterDate) params.set('date', filterDate);
+  if (filterDate) { params.set('startDate', filterDate); params.set('endDate', filterDate); }
+  if (filterUserId.trim()) params.set('userId', filterUserId.trim());
+  if (filterDepartment.trim()) params.set('department', filterDepartment.trim());
 
   const { data: allAttendance, isLoading: allLoading } = useQuery<Attendance[]>({
-    queryKey: ['all-attendance', filterDate],
+    queryKey: ['all-attendance', filterDate, filterUserId, filterDepartment],
     queryFn: () => api.get(`/attendance?${params.toString()}`).then((r) => r.data),
     enabled: isManager,
   });
@@ -275,22 +279,49 @@ export default function AttendancePage() {
 
       {/* Filter (manager) */}
       {isManager && (
-        <div className="bg-white rounded-xl border border-slate-200 p-4 mb-4 flex items-center gap-3 animate-slide-up animate-delay-100">
-          <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z" />
-          </svg>
-          <label className="text-sm text-slate-600 font-medium">Date :</label>
-          <input
-            type="date"
-            value={filterDate}
-            onChange={(e) => setFilterDate(e.target.value)}
-            className="input-field w-auto"
-          />
-          {filterDate && (
-            <button onClick={() => setFilterDate('')} className="text-slate-400 hover:text-slate-600 text-xs underline">
-              Effacer
-            </button>
-          )}
+        <div className="bg-white rounded-xl border border-slate-200 p-4 mb-4 animate-slide-up animate-delay-100">
+          <div className="flex flex-wrap items-center gap-3">
+            <svg className="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z" />
+            </svg>
+            <div className="flex items-center gap-2">
+              <label className="text-sm text-slate-600 font-medium whitespace-nowrap">Date :</label>
+              <input
+                type="date"
+                value={filterDate}
+                onChange={(e) => setFilterDate(e.target.value)}
+                className="input-field w-auto"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="text-sm text-slate-600 font-medium whitespace-nowrap">Département :</label>
+              <input
+                type="text"
+                placeholder="ex: Informatique"
+                value={filterDepartment}
+                onChange={(e) => setFilterDepartment(e.target.value)}
+                className="input-field w-40"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="text-sm text-slate-600 font-medium whitespace-nowrap">ID employé :</label>
+              <input
+                type="text"
+                placeholder="ID…"
+                value={filterUserId}
+                onChange={(e) => setFilterUserId(e.target.value)}
+                className="input-field w-36"
+              />
+            </div>
+            {(filterDate || filterUserId || filterDepartment) && (
+              <button
+                onClick={() => { setFilterDate(''); setFilterUserId(''); setFilterDepartment(''); }}
+                className="text-slate-400 hover:text-slate-600 text-xs underline ml-auto"
+              >
+                Effacer tout
+              </button>
+            )}
+          </div>
         </div>
       )}
 
