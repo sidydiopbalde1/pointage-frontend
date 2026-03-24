@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { motion } from '@/components/ui/Motion';
 
 function useIsDesktop() {
   const [isDesktop, setIsDesktop] = useState(false);
@@ -90,8 +91,20 @@ export default function BottomNav() {
         const active = pathname === item.href || pathname.startsWith(item.href + '/');
         return (
           <Link key={item.href} href={item.href} className={`bottom-nav-item ${active ? 'active' : ''}`}>
-            <div className="nav-icon-wrap">{item.icon}</div>
-            <span>{item.label}</span>
+            <motion.div
+              className="nav-icon-wrap"
+              whileTap={{ scale: 0.88 }}
+              animate={active ? { scale: 1.08 } : { scale: 1 }}
+              transition={{ duration: 0.18, ease: [0.34, 1.56, 0.64, 1] }}
+            >
+              {item.icon}
+            </motion.div>
+            <motion.span
+              animate={active ? { opacity: 1, y: 0 } : { opacity: 0.65, y: 1 }}
+              transition={{ duration: 0.2 }}
+            >
+              {item.label}
+            </motion.span>
           </Link>
         );
       })}

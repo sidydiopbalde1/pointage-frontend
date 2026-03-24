@@ -6,26 +6,38 @@ import { TodayStats, Attendance, Leave } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSocket } from '@/hooks/useSocket';
 import { useState } from 'react';
+import { motion, AnimatePresence, StaggerContainer, StaggerItem, AnimatedCard } from '@/components/ui/Motion';
 
 interface StatCardProps {
   label: string;
   value: number;
   icon: React.ReactNode;
   color: string;
-  delay?: string;
 }
 
-function StatCard({ label, value, icon, color, delay = '' }: StatCardProps) {
+function StatCard({ label, value, icon, color }: StatCardProps) {
   return (
-    <div className={`bg-white rounded-2xl p-5 shadow-sm border border-slate-100 card-hover animate-slide-up ${delay}`}>
+    <AnimatedCard className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
       <div className="flex items-start justify-between mb-4">
-        <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${color}`}>
+        <motion.div
+          className={`w-11 h-11 rounded-xl flex items-center justify-center ${color}`}
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.3, ease: [0.34, 1.56, 0.64, 1] }}
+        >
           {icon}
-        </div>
+        </motion.div>
       </div>
-      <p className="text-3xl font-bold text-slate-800 animate-count-up">{value}</p>
+      <motion.p
+        className="text-3xl font-bold text-slate-800"
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, delay: 0.1 }}
+      >
+        {value}
+      </motion.p>
       <p className="text-slate-500 text-sm mt-1">{label}</p>
-    </div>
+    </AnimatedCard>
   );
 }
 
@@ -98,74 +110,96 @@ export default function DashboardPage() {
   return (
     <div className="max-w-7xl mx-auto">
       {/* Header */}
-      <div className="mb-6 animate-slide-up">
+      <motion.div
+        className="mb-6"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.28 }}
+      >
         <h1 className="text-2xl font-bold text-slate-800">Tableau de bord</h1>
         <p className="text-slate-500 text-sm mt-0.5">Vue d'ensemble en temps réel</p>
-      </div>
+      </motion.div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <AnimatePresence mode="wait">
         {statsLoading ? (
-          Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="bg-white rounded-2xl p-5 border border-slate-100">
-              <Skeleton className="w-11 h-11 mb-4" />
-              <Skeleton className="h-8 w-16 mb-2" />
-              <Skeleton className="h-4 w-24" />
-            </div>
-          ))
+          <motion.div
+            key="skeleton"
+            className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="bg-white rounded-2xl p-5 border border-slate-100">
+                <Skeleton className="w-11 h-11 mb-4" />
+                <Skeleton className="h-8 w-16 mb-2" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+            ))}
+          </motion.div>
         ) : (
-          <>
-            <StatCard
-              label="Total employés"
-              value={displayStats?.total ?? 0}
-              color="bg-indigo-50 text-indigo-600"
-              delay="animate-delay-100"
-              icon={
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
-                </svg>
-              }
-            />
-            <StatCard
-              label="Présents aujourd'hui"
-              value={displayStats?.present ?? 0}
-              color="bg-emerald-50 text-emerald-600"
-              delay="animate-delay-200"
-              icon={
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                </svg>
-              }
-            />
-            <StatCard
-              label="En retard"
-              value={displayStats?.late ?? 0}
-              color="bg-amber-50 text-amber-600"
-              delay="animate-delay-300"
-              icon={
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
-                </svg>
-              }
-            />
-            <StatCard
-              label="Absents"
-              value={displayStats?.absent ?? 0}
-              color="bg-red-50 text-red-500"
-              delay="animate-delay-400"
-              icon={
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                </svg>
-              }
-            />
-          </>
+          <StaggerContainer key="stats" className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <StaggerItem>
+              <StatCard
+                label="Total employés"
+                value={displayStats?.total ?? 0}
+                color="bg-indigo-50 text-indigo-600"
+                icon={
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+                  </svg>
+                }
+              />
+            </StaggerItem>
+            <StaggerItem>
+              <StatCard
+                label="Présents aujourd'hui"
+                value={displayStats?.present ?? 0}
+                color="bg-emerald-50 text-emerald-600"
+                icon={
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                  </svg>
+                }
+              />
+            </StaggerItem>
+            <StaggerItem>
+              <StatCard
+                label="En retard"
+                value={displayStats?.late ?? 0}
+                color="bg-amber-50 text-amber-600"
+                icon={
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                  </svg>
+                }
+              />
+            </StaggerItem>
+            <StaggerItem>
+              <StatCard
+                label="Absents"
+                value={displayStats?.absent ?? 0}
+                color="bg-red-50 text-red-500"
+                icon={
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                  </svg>
+                }
+              />
+            </StaggerItem>
+          </StaggerContainer>
         )}
-      </div>
+      </AnimatePresence>
 
       {/* Progress bar */}
       {!statsLoading && displayStats && displayStats.total > 0 && (
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 mb-6 animate-slide-up animate-delay-300">
+        <motion.div
+          className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 mb-6"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.25 }}
+        >
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-semibold text-slate-700 text-sm">Taux de présence</h3>
             <span className="text-indigo-600 font-bold text-sm">
@@ -173,9 +207,11 @@ export default function DashboardPage() {
             </span>
           </div>
           <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-1000"
-              style={{ width: `${((displayStats.present + displayStats.late) / displayStats.total) * 100}%` }}
+            <motion.div
+              className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500"
+              initial={{ width: 0 }}
+              animate={{ width: `${((displayStats.present + displayStats.late) / displayStats.total) * 100}%` }}
+              transition={{ duration: 1.2, ease: [0.4, 0, 0.2, 1], delay: 0.3 }}
             />
           </div>
           <div className="flex gap-4 mt-3 text-xs text-slate-500">
@@ -189,12 +225,17 @@ export default function DashboardPage() {
               <span className="w-2 h-2 rounded-full bg-red-500" />Absents: {displayStats.absent}
             </span>
           </div>
-        </div>
+        </motion.div>
       )}
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* Recent attendance */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 animate-slide-up animate-delay-200">
+        <motion.div
+          className="bg-white rounded-2xl shadow-sm border border-slate-100"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.2 }}
+        >
           <div className="flex items-center justify-between p-5 border-b border-slate-100">
             <h3 className="font-semibold text-slate-800">Pointages récents</h3>
             <span className="badge bg-indigo-50 text-indigo-600">Aujourd'hui</span>
@@ -215,10 +256,12 @@ export default function DashboardPage() {
               <div className="p-8 text-center text-slate-400 text-sm">Aucun pointage aujourd'hui</div>
             ) : (
               recentAttendance?.map((a, i) => (
-                <div
+                <motion.div
                   key={a.id}
-                  className={`flex items-center gap-3 p-4 table-row-hover animate-slide-up`}
-                  style={{ animationDelay: `${i * 0.05}s` }}
+                  className="flex items-center gap-3 p-4 table-row-hover"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.25, delay: i * 0.05 }}
                 >
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-violet-500 flex items-center justify-center text-white text-xs font-semibold shrink-0">
                     {a.user?.firstName?.[0]}{a.user?.lastName?.[0]}
@@ -235,14 +278,19 @@ export default function DashboardPage() {
                   <span className={`badge ${statusColor[a.status] ?? 'bg-slate-100 text-slate-500'}`}>
                     {a.status === 'PRESENT' ? 'Présent' : a.status === 'LATE' ? 'Retard' : 'Mi-temps'}
                   </span>
-                </div>
+                </motion.div>
               ))
             )}
           </div>
-        </div>
+        </motion.div>
 
         {/* Pending leaves */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 animate-slide-up animate-delay-300">
+        <motion.div
+          className="bg-white rounded-2xl shadow-sm border border-slate-100"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.3 }}
+        >
           <div className="flex items-center justify-between p-5 border-b border-slate-100">
             <h3 className="font-semibold text-slate-800">Congés en attente</h3>
             {(pendingLeaves?.length ?? 0) > 0 && (
@@ -265,10 +313,12 @@ export default function DashboardPage() {
               <div className="p-8 text-center text-slate-400 text-sm">Aucun congé en attente</div>
             ) : (
               pendingLeaves?.map((leave, i) => (
-                <div
+                <motion.div
                   key={leave.id}
-                  className="flex items-center gap-3 p-4 table-row-hover animate-slide-up"
-                  style={{ animationDelay: `${i * 0.05}s` }}
+                  className="flex items-center gap-3 p-4 table-row-hover"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.25, delay: i * 0.05 }}
                 >
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center text-white text-xs font-semibold shrink-0">
                     {leave.user?.firstName?.[0]}{leave.user?.lastName?.[0]}
@@ -284,11 +334,11 @@ export default function DashboardPage() {
                   <span className={`badge ${leaveColor[leave.status]}`}>
                     {leave.status === 'PENDING' ? 'En attente' : leave.status}
                   </span>
-                </div>
+                </motion.div>
               ))
             )}
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

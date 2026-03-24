@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { motion, AnimatePresence } from '@/components/ui/Motion';
 
 interface NavItem {
   href: string;
@@ -108,12 +109,18 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   return (
     <>
       {/* Mobile overlay */}
-      {open && (
-        <div
-          className="fixed inset-0 bg-slate-900/60 z-40 lg:hidden animate-fade-in backdrop-blur-sm"
-          onClick={onClose}
-        />
-      )}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            className="fixed inset-0 bg-slate-900/60 z-40 lg:hidden backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={onClose}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Sidebar */}
       <aside
@@ -157,25 +164,36 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           {visibleItems.map((item, i) => {
             const active = pathname === item.href || pathname.startsWith(item.href + '/');
             return (
-              <Link
+              <motion.div
                 key={item.href}
-                href={item.href}
-                onClick={onClose}
-                className={`sidebar-link animate-slide-in-left`}
-                style={{ animationDelay: `${i * 0.04}s` }}
+                initial={{ opacity: 0, x: -16 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.28, delay: i * 0.04, ease: [0.4, 0, 0.2, 1] }}
               >
-                <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all ${
-                  active
-                    ? 'bg-indigo-500/20 text-indigo-400'
-                    : 'text-slate-500'
-                }`}>
-                  {item.icon}
-                </span>
-                <span className={active ? 'text-slate-200' : ''}>{item.label}</span>
-                {active && (
-                  <span className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-400/80" />
-                )}
-              </Link>
+                <Link
+                  href={item.href}
+                  onClick={onClose}
+                  className="sidebar-link"
+                >
+                  <motion.span
+                    className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all ${
+                      active ? 'bg-indigo-500/20 text-indigo-400' : 'text-slate-500'
+                    }`}
+                    whileHover={{ scale: 1.1 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    {item.icon}
+                  </motion.span>
+                  <span className={active ? 'text-slate-200' : ''}>{item.label}</span>
+                  {active && (
+                    <motion.span
+                      className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-400/80"
+                      layoutId="sidebar-active-dot"
+                      transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                    />
+                  )}
+                </Link>
+              </motion.div>
             );
           })}
         </nav>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { motion, AnimatePresence } from '@/components/ui/Motion';
 
 function CurrentYear() {
   const [year, setYear] = useState(2026);
@@ -87,7 +88,12 @@ export default function LoginPage() {
 
       {/* Right panel */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 bg-slate-50">
-        <div className="w-full max-w-md animate-slide-up">
+        <motion.div
+          className="w-full max-w-md"
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+        >
           {/* Mobile logo */}
           <div className="lg:hidden flex flex-col items-center mb-8">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg mb-3">
@@ -104,14 +110,22 @@ export default function LoginPage() {
               <p className="text-slate-500 mt-1 text-sm">Bienvenue ! Entrez vos identifiants.</p>
             </div>
 
+            <AnimatePresence>
             {error && (
-              <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-100 text-red-600 text-sm flex items-center gap-2 animate-scale-in">
+              <motion.div
+                className="mb-4 p-3 rounded-lg bg-red-50 border border-red-100 text-red-600 text-sm flex items-center gap-2"
+                initial={{ opacity: 0, scale: 0.96, y: -6 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96, y: -4 }}
+                transition={{ duration: 0.22 }}
+              >
                 <svg className="w-4 h-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-8-5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0v-4.5A.75.75 0 0 1 10 5Zm0 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clipRule="evenodd" />
                 </svg>
                 {error}
-              </div>
+              </motion.div>
             )}
+            </AnimatePresence>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               <div>
@@ -180,7 +194,14 @@ export default function LoginPage() {
                 )}
               </div>
 
-              <button type="submit" className="btn-primary w-full justify-center py-3 text-base mt-1" disabled={loading}>
+              <motion.button
+                type="submit"
+                className="btn-primary w-full justify-center py-3 text-base mt-1"
+                disabled={loading}
+                whileHover={!loading ? { scale: 1.02, y: -1 } : {}}
+                whileTap={!loading ? { scale: 0.98 } : {}}
+                transition={{ duration: 0.15 }}
+              >
                 {loading ? (
                   <>
                     <div className="w-4 h-4 rounded-full border-2 border-white/40 border-t-white animate-spin" />
@@ -194,14 +215,14 @@ export default function LoginPage() {
                     Se connecter
                   </>
                 )}
-              </button>
+              </motion.button>
             </form>
           </div>
 
           <p className="text-center text-slate-400 text-xs mt-6">
             © <CurrentYear /> Pointage Pro — Tous droits réservés
           </p>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
