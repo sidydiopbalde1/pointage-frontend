@@ -95,6 +95,14 @@ export interface PublicHoliday {
   updatedAt: string;
 }
 
+export interface AppSettings {
+  id: string;
+  officeLat: number;
+  officeLng: number;
+  officeRadiusMeters: number;
+  updatedAt: string;
+}
+
 export interface Absence {
   id: string;
   userId: string;

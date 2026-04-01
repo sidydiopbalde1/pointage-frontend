@@ -10,6 +10,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
   isAdmin: boolean;
   isManager: boolean;
 }
@@ -56,11 +57,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(u);
   };
 
+  const refreshUser = useCallback(async () => {
+    const res = await api.get<User>('/auth/me');
+    setUser(res.data);
+  }, []);
+
   const isAdmin = user?.role === 'ADMIN';
   const isManager = user?.role === 'ADMIN' || user?.role === 'MANAGER';
 
   return (
-    <AuthContext.Provider value={{ user, token, isLoading, login, logout, isAdmin, isManager }}>
+    <AuthContext.Provider value={{ user, token, isLoading, login, logout, refreshUser, isAdmin, isManager }}>
       {children}
     </AuthContext.Provider>
   );
